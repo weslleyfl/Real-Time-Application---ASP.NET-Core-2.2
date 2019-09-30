@@ -1,0 +1,18 @@
+AccountController is an important component of the entire authentication code base and is created by
+default by Visual Studio. It consists of the following APIs and methods:
+
+• UserManager: This is part of the Microsoft.AspNetCore.Identity API provided by
+  Microsoft, and it provides the APIs for managing users in a persistence store.
+• SigninManager: This is part of the Microsoft.AspNetCore.Identity API provided
+  by Microsoft, and it provides the APIs to manage sign-in operations for users from different sources.
+• IEmailSender, ISmsSender, and ILogger:
+• IEmailSender is used by AccountController to send e-mail for account confirmation and password resets.
+• ISmsSender is used for two-factor authentication.
+• ILogger is used to log messages and information about the user sign-in process.
+• Action methods: AccountController has default controller actions that are used to
+  perform various authentication-related activities. 
+
+Actions are used for the following:
+
+Registration, Login, Logout, External Sources Login, Forgot Password, Reset
+Password, Two-Factor Authentication, and Send and Verify Codes.
