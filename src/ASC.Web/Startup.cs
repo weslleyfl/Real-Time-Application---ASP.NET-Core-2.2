@@ -79,10 +79,13 @@ namespace ASC.Web
             //var applicationSettings = new ApplicationSettings();
             //new ConfigureFromConfigurationOptions<ApplicationSettings>(Configuration.GetSection("AppSettings")).Configure(applicationSettings);
             //services.AddSingleton(applicationSettings);           
+            
+            // Add application services.
+            // aqui
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            // Add application services.
+         
             // Resolving IIdentitySeed dependency in Startup class
             services.AddSingleton<IIdentitySeed, IdentitySeed>();
         }
