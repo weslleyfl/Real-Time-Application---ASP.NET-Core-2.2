@@ -18,6 +18,8 @@ using ASC.Web.Configuration;
 // using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ASC.Web.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using ASC.Web.Services;
 
 namespace ASC.Web
 {
@@ -48,10 +50,17 @@ namespace ASC.Web
             //    .AddDefaultUI(UIFramework.Bootstrap4)                
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.Configure<PasswordHasherOptions>(options =>
+                  options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV2
+            );
             // Add Elcamino Azure Table Identity services.
             services.AddIdentity<ApplicationUser, ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole>((options) =>
             {
                 options.User.RequireUniqueEmail = true;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
             })
             //or use .AddAzureTableStores with your ApplicationUser extends IdentityUser if your code depends on the Role, Claim and Token collections on the user object.
             //You can safely switch between .AddAzureTableStores and .AddAzureTableStoresV2. Just make sure the Application User extends the correct IdentityUser/IdentityUserV2
@@ -66,6 +75,11 @@ namespace ASC.Web
             .AddDefaultTokenProviders()
             .CreateAzureTablesIfNotExists<ApplicationDbContext>(); //can remove after first run;
 
+            // O código a seguir altera todos os tokens de proteção de dados período de tempo limite para 3 horas:
+            services.Configure<DataProtectionTokenProviderOptions>(o =>
+                   o.TokenLifespan = TimeSpan.FromMinutes(10)); /*TimeSpan.FromHours(3));*/
+
+
             // Add functionality to inject IOptions<T>
             services.AddOptions();
             // Add our Config object so it can be injected
@@ -79,15 +93,21 @@ namespace ASC.Web
             //var applicationSettings = new ApplicationSettings();
             //new ConfigureFromConfigurationOptions<ApplicationSettings>(Configuration.GetSection("AppSettings")).Configure(applicationSettings);
             //services.AddSingleton(applicationSettings);           
-            
-            // Add application services.
-            // aqui
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // Add application services.            
+            // Resolve HttpContextAccessor dependency
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-         
+            services.AddMvc(options =>
+           {
+               options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+           }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+
             // Resolving IIdentitySeed dependency in Startup class
             services.AddSingleton<IIdentitySeed, IdentitySeed>();
+            services.AddTransient<IEmailSender, AuthMessageSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,7 +148,7 @@ namespace ASC.Web
                 //Resolve ASP .NET Core Identity with DI help
                 var userManager = (UserManager<ApplicationUser>)scope.ServiceProvider.GetService(typeof(UserManager<ApplicationUser>));
                 var userRole = (RoleManager<ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole>)scope.ServiceProvider.GetService(typeof(RoleManager<ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole>));
-               
+
                 // do you things here
                 await storageSeed.Seed(userManager, userRole, app.ApplicationServices.GetService<IOptions<ApplicationSettings>>());
             }

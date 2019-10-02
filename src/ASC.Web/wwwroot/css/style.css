@@ -96,7 +96,7 @@ header.secureLayout, main.secureLayout, footer.secureLayout {
     margin-bottom: 0px;
 }
 
-/*login*/ 
+/*login*/
 
 .padding-left-10px {
     padding-left: 10px;
@@ -114,4 +114,15 @@ header.secureLayout, main.secureLayout, footer.secureLayout {
 
 .validation-summary-errors {
     color: #FF4081;
+}
+
+
+/*Add the following styles, which are used by some of the Reset Password views:*/
+
+.margin-top-50px {
+    margin-top: 50px;
+}
+
+.margin-bottom-50px {
+    margin-bottom: 50px;
 }

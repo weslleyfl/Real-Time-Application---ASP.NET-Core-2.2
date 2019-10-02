@@ -30,8 +30,7 @@ namespace ASC.Web.Data
                     IdentityResult roleResult = await roleManager.CreateAsync(storageRole);
                 }
             }
-
-
+            
             // Create admin if he doesn’t exist
             var admin = await userManager.FindByEmailAsync(options.Value.AdminEmail);
             if (admin == null)
