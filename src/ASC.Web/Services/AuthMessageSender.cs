@@ -21,6 +21,8 @@ namespace ASC.Web.Services
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
+            // TODO: Email padrao inserido manualmente - SendEmailAsync
+            email = "weslleylopes@fundep.com.br";
 
             var emailMessage = new MimeMessage();
 

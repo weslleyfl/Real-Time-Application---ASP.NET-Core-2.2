@@ -38,8 +38,9 @@
 
                         <ul>
                             <li><a href="#!">Customers<i class="material-icons">account_box</i></a></li>
-                            <li><a href="#!">Provision User<i class="material-icons">person_add</i></a></li>
+                            @*<li><a href="#!">Provision User<i class="material-icons">person_add</i></a></li>*@
                             <li><a href="#!">Deactivate User<i class="material-icons">remove_circle</i></a></li>
+                            <li><a asp-controller="Engineers" asp-action="ServiceEngineers">Service Engineers<i class="material-icons">person_add</i></a></li>
                         </ul>
 
                     </div>
@@ -56,7 +57,7 @@
                     <a class="collapsible-header">Settings<i class="material-icons">settings</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a href="#!" id="ancrResetPassword">Reset Password<i class="material-icons">lock_outline</i></a></li>                         
+                            <li><a href="#!" id="ancrResetPassword">Reset Password<i class="material-icons">lock_outline</i></a></li>
                         </ul>
                     </div>
                 </li>
@@ -126,6 +127,8 @@
 
 
 @section Scripts{
+
+    @RenderSection("Scripts", required: false)
 
     <script type="text/javascript">
 

@@ -110,13 +110,13 @@ namespace ASC.Web.Areas.Identity.Pages.Account
             var user = await _userManager.FindByEmailAsync(userEmail);
 
             // TODO: Remover email padrao
-            Input.Email = _settings.Value.ToEmail;
+            Input.Email = user?.Email ?? _settings.Value.ToEmail;
 
             // Generate User code
             var codeToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var callbackUrl = Url.Page(
-                      "./ResetPassword",
+                     "/Account/ResetPassword", // "./ResetPassword",
                      pageHandler: null,
                      values: new { userId = user.Id, code = codeToken },
                      protocol: Request.Scheme);
@@ -124,9 +124,7 @@ namespace ASC.Web.Areas.Identity.Pages.Account
             // Send Email
             await _emailSender.SendEmailAsync(Input.Email, "Confirme seu email",
                        $"Por favor, confirme sua conta <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicando aqui</a>.");
-
-            //return View("ResetPasswordEmailConfirmation");
-
+                        
             // Don't reveal that the user does not exist
             return RedirectToPage("./ResetPasswordConfirmation");
 
