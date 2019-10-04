@@ -66,10 +66,14 @@
             <div class="section white-text padding-left-10px blue-grey lighten-1">
                 <h5>Service Engineer Details</h5>
             </div>
+
             <div class="divider"></div>
+
             <form asp-controller="Engineers" asp-action="ServiceEngineers" method="post" class="col s12" id="fromUser">
+                
                 <input type="hidden" asp-for="Registration.IsEdit" />
                 <input type="hidden" asp-for="Registration.Email" />
+
                 <div class="input-field col s4">
                     <input asp-for="Registration.Email" id="Input_Registration_Email" />
                     <label asp-for="Registration.Email"></label>

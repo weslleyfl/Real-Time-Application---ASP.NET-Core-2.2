@@ -9,7 +9,7 @@ namespace ASC.Web.Models
     /// <summary>
     /// Add profile data for application users by adding properties to the ApplicationUser class
     /// </summary>
-    public class ApplicationUser : IdentityUser //IdentityUserV2
+    public class ApplicationUser : IdentityUserV2
     {
     }
 }

@@ -10,18 +10,21 @@ using ASC.Utilities;
 using ASC.Web.Models.AccountViewModels;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ASC.Web.Controllers
 {
     public class EngineersController : BaseController
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public EngineersController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public EngineersController(UserManager<ApplicationUser> userManager, IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _signInManager = signInManager;
         }
 
         [HttpGet]
@@ -77,11 +80,16 @@ namespace ASC.Web.Controllers
 
                 // Update claims
                 user = await _userManager.FindByEmailAsync(serviceEngineer.Registration.Email);
-                var isActiveClaim = user.Claims.SingleOrDefault(p => p.ClaimType == "IsActive");
+
+                IList<Claim> userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
+
+                //var isActiveClaim = user.Claims.SingleOrDefault(p => p.ClaimType == "IsActive");                
+                var isActiveClaim = userClaims.FirstOrDefault(p => p.Type == "IsActive");
+
                 var removeClaimResult = await _userManager.RemoveClaimAsync(user,
-                    new System.Security.Claims.Claim(isActiveClaim.ClaimType, isActiveClaim.ClaimValue));
+                    new System.Security.Claims.Claim(isActiveClaim.Type, isActiveClaim.Value));
                 var addClaimResult = await _userManager.AddClaimAsync(user,
-                    new System.Security.Claims.Claim(isActiveClaim.ClaimType, serviceEngineer.Registration.IsActive.ToString()));
+                    new System.Security.Claims.Claim(isActiveClaim.Type, serviceEngineer.Registration.IsActive.ToString()));
             }
             else
             {
