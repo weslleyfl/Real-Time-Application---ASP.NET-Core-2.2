@@ -35,8 +35,10 @@
                             <tr>
                                 <td>@user.Email</td>
                                 <td>@user.UserName</td>
-                                <td>@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value))</td>
-                                <td><img src="@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>
+                                <td>@user.IsActiveUser</td>
+                                <td><img src="@(Boolean.Parse(user.IsActiveUser.ToString()) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>
+                                @*<td>@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value))</td>*@
+                                @*<td><img src="@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>*@
                                 <td><i class="small material-icons edit cursor-hand">mode_edit</i></td>
                             </tr>
                         }

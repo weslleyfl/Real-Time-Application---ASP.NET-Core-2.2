@@ -11,5 +11,6 @@ namespace ASC.Web.Models
     /// </summary>
     public class ApplicationUser : IdentityUserV2
     {
+        public bool IsActiveUser { get; set; }
     }
 }

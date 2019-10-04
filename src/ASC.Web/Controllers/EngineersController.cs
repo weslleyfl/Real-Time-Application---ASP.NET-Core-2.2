@@ -32,7 +32,16 @@ namespace ASC.Web.Controllers
         public async Task<IActionResult> ServiceEngineers()
         {
             var serviceEngineers = await _userManager.GetUsersInRoleAsync(nameof(Roles.Engineer));
+            IList<Claim> userClaims = null;
 
+            
+            foreach (var user in serviceEngineers)
+            {
+                userClaims = (await _signInManager.UserManager.GetClaimsAsync(user));
+                user.IsActiveUser = Boolean.Parse(userClaims.FirstOrDefault(p => p.Type == "IsActive").Value);
+                
+            }
+            
             // Hold all service engineers in session
             HttpContext.Session.SetSession("ServiceEngineers", serviceEngineers);
 
@@ -82,7 +91,7 @@ namespace ASC.Web.Controllers
                 user = await _userManager.FindByEmailAsync(serviceEngineer.Registration.Email);
 
                 IList<Claim> userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
-
+                
                 //var isActiveClaim = user.Claims.SingleOrDefault(p => p.ClaimType == "IsActive");                
                 var isActiveClaim = userClaims.FirstOrDefault(p => p.Type == "IsActive");
 
@@ -102,7 +111,8 @@ namespace ASC.Web.Controllers
                 };
 
                 IdentityResult result = await _userManager.CreateAsync(user, serviceEngineer.Registration.Password);
-                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", serviceEngineer.Registration.Email));
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", 
+                                                 serviceEngineer.Registration.Email));
                 await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("IsActive", serviceEngineer.Registration.IsActive.ToString()));
 
                 if (!result.Succeeded)
@@ -112,7 +122,7 @@ namespace ASC.Web.Controllers
                 }
 
                 // Assign user to Engineer Role
-                var roleResult = await _userManager.AddToRoleAsync(user, Roles.Engineer.ToString());
+                var roleResult = await _userManager.AddToRoleAsync(user, nameof(Roles.Engineer));
                 if (!roleResult.Succeeded)
                 {
                     roleResult.Errors.ToList().ForEach(p => ModelState.AddModelError("", p.Description));
@@ -120,18 +130,19 @@ namespace ASC.Web.Controllers
                 }
             }
 
-            if (serviceEngineer.Registration.IsActive)
-            {
-                await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
-                    "Account Created/Modified",
-                    $"Email : {serviceEngineer.Registration.Email} /n Passowrd : {serviceEngineer.Registration.Password}");
-            }
-            else
-            {
-                await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
-                    "Account Deactivated",
-                    $"Your account has been deactivated.");
-            }
+            // TODO: Não enviar email engineers
+            //if (serviceEngineer.Registration.IsActive)
+            //{
+            //    await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
+            //        "Account Created/Modified",
+            //        $"Email : {serviceEngineer.Registration.Email} /n Passowrd : {serviceEngineer.Registration.Password}");
+            //}
+            //else
+            //{
+            //    await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
+            //        "Account Deactivated",
+            //        $"Your account has been deactivated.");
+            //}
 
             return RedirectToAction("ServiceEngineers");
         }
