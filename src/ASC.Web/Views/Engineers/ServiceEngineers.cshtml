@@ -19,31 +19,31 @@
             @if (Model.ServiceEngineers != null)
             {
                 @* Display List of Service Engineers *@
-                <table class="highlight centered" id="tblServiceEngineers">
-                    <thead>
+            <table class="highlight centered" id="tblServiceEngineers">
+                <thead>
+                    <tr>
+                        <th data-field="Email">Email</th>
+                        <th data-field="UserName">Name</th>
+                        <th data-field="IsActive">Is Active</th>
+                        <th data-field="IsActiveImg">Is Active</th>
+                        <th data-field="Actions">Edit User</th>
+                    </tr>
+                </thead>               
+                <tbody>
+                    @foreach (var user in Model.ServiceEngineers)
+                    {
                         <tr>
-                            <th data-field="Email">Email</th>
-                            <th data-field="UserName">Name</th>
-                            <th data-field="IsActive">Is Active</th>
-                            <th data-field="IsActiveImg">Is Active</th>
-                            <th data-field="Actions">Edit User</th>
+                            <td>@user.Email</td>
+                            <td>@user.UserName</td>
+                            <td>@user.IsActiveUser</td>
+                            <td><img src="@(Boolean.Parse(user.IsActiveUser.ToString()) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>
+                            @*<td>@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value))</td>*@
+                            @*<td><img src="@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>*@
+                            <td><i class="small material-icons edit cursor-hand">mode_edit</i></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model.ServiceEngineers)
-                        {
-                            <tr>
-                                <td>@user.Email</td>
-                                <td>@user.UserName</td>
-                                <td>@user.IsActiveUser</td>
-                                <td><img src="@(Boolean.Parse(user.IsActiveUser.ToString()) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>
-                                @*<td>@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value))</td>*@
-                                @*<td><img src="@(Boolean.Parse(User.Claims.SingleOrDefault(p => p.Type == "IsActive").Value) ? "/images/green_tick.png" : "/images/red_cross.png")" /></td>*@
-                                <td><i class="small material-icons edit cursor-hand">mode_edit</i></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                    }
+                </tbody>
+            </table>
             }
             else
             {
@@ -52,7 +52,7 @@
                     <div class="card-content white-text">
                         <span class="card-title">No Service Engineers!!!</span>
                         <p>
-                            No Service Engineers found, please add a Service Engineer to system.
+                            Nenhum Serviço de Engenharia foi encontrado. Adicione um Serviço de Engenharia ao sistema.
                         </p>
                     </div>
                 </div>
@@ -63,6 +63,7 @@
     <div class="row"></div>
 
     @* Details Section *@
+
     <div class="row z-depth-3">
         <div class="col s12 padding-0px">
             <div class="section white-text padding-left-10px blue-grey lighten-1">

@@ -59,6 +59,30 @@ namespace ASC.Web.Data
                 }
             }
 
+            // Weslley admin
+            var adminWeslley = await userManager.FindByEmailAsync("weslleypontolopes@gmail.com");
+            if (adminWeslley == null)
+            {
+                ApplicationUser user = new ApplicationUser
+                {
+                    UserName = "Weslley",
+                    Email = "weslleypontolopes@gmail.com",
+                    EmailConfirmed = true
+                };
+
+                IdentityResult result = await userManager.CreateAsync(user, "123456");
+
+                await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+                                                "weslleypontolopes@gmail.com"));
+                await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("IsActive", "True"));
+
+                // Add Admin to Admin roles
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(user, nameof(Roles.Admin));
+                }
+            }
+
             // ENGINEER
             // Create a service engineer if he doesn’t exist
             var engineer = await userManager.FindByEmailAsync(options.Value.EngineerEmail);
