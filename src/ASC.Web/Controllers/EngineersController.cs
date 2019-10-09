@@ -59,6 +59,7 @@ namespace ASC.Web.Controllers
         public async Task<IActionResult> ServiceEngineers(ServiceEngineerViewModel serviceEngineer)
         {
             serviceEngineer.ServiceEngineers = HttpContext.Session.GetSession<List<ApplicationUser>>("ServiceEngineers");
+
             if (!ModelState.IsValid)
             {
                 return View(serviceEngineer);

@@ -82,6 +82,11 @@ namespace ASC.Web.Data
                     await userManager.AddToRoleAsync(user, nameof(Roles.Admin));
                 }
             }
+            //else
+            //{
+            //    await userManager.RemoveFromRoleAsync(adminWeslley, nameof(Roles.Admin));
+            //    await userManager.AddToRoleAsync(adminWeslley, nameof(Roles.User));
+            //}
 
             // ENGINEER
             // Create a service engineer if he doesn’t exist

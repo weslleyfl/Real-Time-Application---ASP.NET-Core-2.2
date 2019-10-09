@@ -28,8 +28,9 @@
                 <a href="#!email"><span class="white-text email">@currentUser.Email</span></a>
             </div>
         </li>
-        <li><a class="collapsible-header" href="#!"><i class="material-icons">dashboard</i>Dashboard</a></li>
+        <li><a class="collapsible-header" asp-controller="Dashboard" asp-action="Dashboard"><i class="material-icons">dashboard</i>Dashboard</a></li>
 
+        @*collapsible-accordion User Administration *@
         <li>
             <ul class="collapsible collapsible-accordion">
                 <li>
@@ -37,8 +38,7 @@
                     <div class="collapsible-body">
 
                         <ul>
-                            <li><a href="#!">Customers<i class="material-icons">account_box</i></a></li>
-                            @*<li><a href="#!">Provision User<i class="material-icons">person_add</i></a></li>*@
+                            <li><a asp-controller="Customers" asp-action="Customers">Customers<i class="material-icons">account_box</i></a></li>                   
                             <li><a href="#!">Deactivate User<i class="material-icons">remove_circle</i></a></li>
                             <li><a asp-controller="Engineers" asp-action="ServiceEngineers">Service Engineers<i class="material-icons">person_add</i></a></li>
                         </ul>
@@ -47,17 +47,20 @@
                 </li>
             </ul>
         </li>
+
         <li><a class="collapsible-header" href="#!"><i class="material-icons">perm_data_setting</i>Service Requests</a></li>
         <li><a class="collapsible-header" href="#!"><i class="material-icons">message</i>Service Notifications</a></li>
         <li><a class="collapsible-header" href="#!"><i class="material-icons">inbox</i>Promotions</a></li>
 
+        @*collapsible-accordion settings *@
         <li>
             <ul class="collapsible collapsible-accordion">
                 <li>
                     <a class="collapsible-header">Settings<i class="material-icons">settings</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a href="#!" id="ancrResetPassword">Reset Password<i class="material-icons">lock_outline</i></a></li>
+                            <li><a asp-controller="Profile" asp-action="Profile" class="collapsible-header">Profile<i class="material-icons">system_update_alt</i></a></li>
+                            <li><a href="#!" id="ancrResetPassword">Reset Password<i class="material-icons">lock_outline</i></a></li>                            
                         </ul>
                     </div>
                 </li>
