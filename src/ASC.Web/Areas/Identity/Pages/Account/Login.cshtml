@@ -52,8 +52,8 @@
             @{
                 var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
                 if (loginProviders.Count != 0)
-                {
-                    <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnurl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                {                    
+                    <form asp-area="Identity" asp-page="./ExternalLogin" asp-route-returnurl="@Model.ReturnUrl" method="post" class="form-horizontal">
                         <div>
                             <p>
                                 @foreach (var provider in loginProviders)

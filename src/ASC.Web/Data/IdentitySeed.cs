@@ -60,20 +60,20 @@ namespace ASC.Web.Data
             }
 
             // Weslley admin
-            var adminWeslley = await userManager.FindByEmailAsync("weslleypontolopes@gmail.com");
+            var adminWeslley = await userManager.FindByEmailAsync("oweslley@hotmail.com");
             if (adminWeslley == null)
             {
                 ApplicationUser user = new ApplicationUser
                 {
                     UserName = "Weslley",
-                    Email = "weslleypontolopes@gmail.com",
+                    Email = "oweslley@hotmail.com",
                     EmailConfirmed = true
                 };
 
                 IdentityResult result = await userManager.CreateAsync(user, "123456");
 
                 await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-                                                "weslleypontolopes@gmail.com"));
+                                                "oweslley@hotmail.com"));
                 await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("IsActive", "True"));
 
                 // Add Admin to Admin roles
