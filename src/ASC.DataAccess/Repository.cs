@@ -76,6 +76,22 @@ namespace ASC.DataAccess
             return result.Results as IEnumerable<T>;
         }
 
+        public async Task<IEnumerable<T>> FindAllAsync()
+        {
+            TableQuery<T> query = new TableQuery<T>();
+            TableContinuationToken tableContinuationToken = null;
+            var result = await storageTable.ExecuteQuerySegmentedAsync(query, tableContinuationToken);
+            return result.Results as IEnumerable<T>;
+        }
+
+        public async Task<IEnumerable<T>> FindAllByPartitionKeyAsync(string partitionkey)
+        {
+            TableQuery<T> query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionkey));
+            TableContinuationToken tableContinuationToken = null;
+            var result = await storageTable.ExecuteQuerySegmentedAsync(query, tableContinuationToken);
+            return result.Results as IEnumerable<T>;
+        }
+
         public async Task CreateTableAsync()
         {
             CloudTable table = tableClient.GetTableReference(typeof(T).Name);

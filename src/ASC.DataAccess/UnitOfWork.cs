@@ -9,11 +9,12 @@ namespace ASC.DataAccess
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private bool disposed;
+        // private bool disposed;
         private bool complete;
         private Dictionary<string, object> _repositories;
         public Queue<Task<Action>> RollbackActions { get; set; }
         public string ConnectionString { get; set; }
+
         public UnitOfWork(string connectionString)
         {
             ConnectionString = connectionString;
@@ -24,34 +25,6 @@ namespace ASC.DataAccess
         {
             complete = true;
         }
-
-        ~UnitOfWork()
-        {
-            Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-                if (disposing)
-                {
-                    try
-                    {
-                        if (!complete) RollbackTransaction();
-                    }
-                    finally
-                    {
-                        RollbackActions.Clear();
-                    }
-                }
-            complete = false;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         private void RollbackTransaction()
         {
             while (RollbackActions.Count > 0)
@@ -60,7 +33,6 @@ namespace ASC.DataAccess
                 undoAction.Result();
             }
         }
-
         public IRepository<T> Repository<T>() where T : TableEntity
         {
             if (_repositories == null)
@@ -72,13 +44,37 @@ namespace ASC.DataAccess
 
             var repositoryType = typeof(Repository<>);
 
-            var repositoryInstance =
-                Activator.CreateInstance(repositoryType
-                    .MakeGenericType(typeof(T)), this);
+            var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), this);
 
             _repositories.Add(type, repositoryInstance);
 
             return (IRepository<T>)_repositories[type];
         }
+        ~UnitOfWork()
+        {
+            Dispose(false);
+        }
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                try
+                {
+                    if (!complete) RollbackTransaction();
+                }
+                finally
+                {
+                    RollbackActions.Clear();
+                }
+            }
+            complete = false;
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
     }
 }

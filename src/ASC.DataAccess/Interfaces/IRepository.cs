@@ -13,6 +13,8 @@ namespace ASC.DataAccess.Interfaces
         Task DeleteAsync(T entity);
         Task<T> FindAsync(string partitionKey, string rowKey);
         Task<IEnumerable<T>> FindAllAsync(string partitionkey);
+        Task<IEnumerable<T>> FindAllAsync();
+        Task<IEnumerable<T>> FindAllByPartitionKeyAsync(string partitionkey);
         Task CreateTableAsync();
     }
 }

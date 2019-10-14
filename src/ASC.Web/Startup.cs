@@ -21,6 +21,13 @@ using ASC.Web.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ASC.Web.Services;
 using Microsoft.AspNetCore.Authentication.Google;
+using ASC.DataAccess.Interfaces;
+using ASC.DataAccess;
+using System.Reflection;
+using ASC.Business.Interfaces;
+using ASC.Business;
+using AutoMapper;
+using Newtonsoft.Json.Serialization;
 
 namespace ASC.Web
 {
@@ -72,7 +79,7 @@ namespace ASC.Web
                 // Lockout settings.
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;                
+                options.Lockout.AllowedForNewUsers = true;
             })
             //or use .AddAzureTableStores with your ApplicationUser extends IdentityUser if your code depends on the Role, Claim and Token collections on the user object.
             //You can safely switch between .AddAzureTableStores and .AddAzureTableStoresV2. Just make sure the Application User extends the correct IdentityUser/IdentityUserV2
@@ -98,7 +105,7 @@ namespace ASC.Web
 
                 options.ClientId = googleAuthNSection["ClientId"];
                 options.ClientSecret = googleAuthNSection["ClientSecret"];
-                                
+
                 //options.ClientId = Configuration["Google:Identity:ClientId"];
                 //options.ClientSecret = Configuration["Google:Identity:ClientSecret"];
             });
@@ -132,21 +139,34 @@ namespace ASC.Web
             // Add application services.            
             // Resolve HttpContextAccessor dependency
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // Resolving IUnitOfWork dependency - SCOPED in the entire request cycle
+            services.AddScoped<IUnitOfWork>(p => new UnitOfWork(Configuration.GetSection("ConnectionStrings:DefaultConnection").Value));
+            services.AddScoped<IMasterDataOperations, MasterDataOperations>();
 
             services.AddMvc(options =>
-           {
-               options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            {
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 
-           }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            })
+                // By default, ASP.NET Core MVC serializes JSON data by using camel casing. To prevent that, we need
+                // to add the following configuration to MVC in the ConfigureServices method of the Startup class
+              .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
+              .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
 
             // Resolving IIdentitySeed dependency in Startup class
             services.AddSingleton<IIdentitySeed, IdentitySeed>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
+
+            // If you are using AspNet Core 2.2 and AutoMapper.Extensions.Microsoft.DependencyInjection v6.1 You need to use in Startup file
+            // Automapper
+            services.AddAutoMapper(typeof(Startup));
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IIdentitySeed storageSeed)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IIdentitySeed storageSeed, IUnitOfWork unitOfWork)
         {
             if (env.IsDevelopment())
             {
@@ -192,6 +212,17 @@ namespace ASC.Web
             //await storageSeed.Seed(app.ApplicationServices.GetService<UserManager<ApplicationUser>>(),
             //                       app.ApplicationServices.GetService<RoleManager<ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole>>(),
             //                       app.ApplicationServices.GetService<IOptions<ApplicationSettings>>());
+
+            var models = Assembly.Load(new AssemblyName("ASC.Models")).GetTypes().Where(type => type.Namespace == "ASC.Models.Models");
+
+            foreach (var model in models)
+            {
+                var repositoryInstance = Activator.CreateInstance(typeof(Repository<>).MakeGenericType(model), unitOfWork);
+                MethodInfo method = typeof(Repository<>).MakeGenericType(model).GetMethod("CreateTableAsync");
+                method.Invoke(repositoryInstance, new object[0]);
+            }
+
+
         }
     }
 }
