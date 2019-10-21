@@ -28,6 +28,7 @@ using ASC.Business.Interfaces;
 using ASC.Business;
 using AutoMapper;
 using Newtonsoft.Json.Serialization;
+using ASC.Web.Data.Cache;
 
 namespace ASC.Web
 {
@@ -129,7 +130,13 @@ namespace ASC.Web
 
             // ISession needs IDistributedCache to store and retrieve items to a persistent medium. 
             // AddDistributedMemoryCache is used to store items in the server memory.
-            services.AddDistributedMemoryCache();
+            //services.AddDistributedMemoryCache();
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetSection("CacheSettings:CacheConnectionString").Value;
+                options.InstanceName = Configuration.GetSection("CacheSettings:CacheInstance").Value;
+            });
+
             services.AddSession();
 
             //var applicationSettings = new ApplicationSettings();
@@ -142,14 +149,15 @@ namespace ASC.Web
             // Resolving IUnitOfWork dependency - SCOPED in the entire request cycle
             services.AddScoped<IUnitOfWork>(p => new UnitOfWork(Configuration.GetSection("ConnectionStrings:DefaultConnection").Value));
             services.AddScoped<IMasterDataOperations, MasterDataOperations>();
+            services.AddScoped<IMasterDataCacheOperations, MasterDataCacheOperations>();
 
             services.AddMvc(options =>
             {
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 
             })
-                // By default, ASP.NET Core MVC serializes JSON data by using camel casing. To prevent that, we need
-                // to add the following configuration to MVC in the ConfigureServices method of the Startup class
+              // By default, ASP.NET Core MVC serializes JSON data by using camel casing. To prevent that, we need
+              // to add the following configuration to MVC in the ConfigureServices method of the Startup class
               .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
               .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -166,8 +174,13 @@ namespace ASC.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IIdentitySeed storageSeed, IUnitOfWork unitOfWork)
+        public async void Configure(IApplicationBuilder app,
+                                    IHostingEnvironment env,
+                                    IIdentitySeed storageSeed,
+                                    IUnitOfWork unitOfWork,
+                                    IMasterDataCacheOperations masterDataCacheOperations)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -221,6 +234,8 @@ namespace ASC.Web
                 MethodInfo method = typeof(Repository<>).MakeGenericType(model).GetMethod("CreateTableAsync");
                 method.Invoke(repositoryInstance, new object[0]);
             }
+
+            await masterDataCacheOperations.CreateMasterDataCacheAsync();
 
 
         }

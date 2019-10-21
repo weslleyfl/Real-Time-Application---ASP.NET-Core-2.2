@@ -13,6 +13,7 @@ using ASC.Utilities;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using OfficeOpenXml;
+using ASC.Web.Data.Cache;
 
 namespace ASC.Web.Controllers
 {
@@ -21,11 +22,13 @@ namespace ASC.Web.Controllers
     {
         private readonly IMasterDataOperations _masterData;
         private readonly IMapper _mapper;
+        private readonly IMasterDataCacheOperations _masterDataCache;
 
-        public MasterDataController(IMasterDataOperations masterData, IMapper mapper)
+        public MasterDataController(IMasterDataOperations masterData, IMapper mapper, IMasterDataCacheOperations masterDataCache)
         {
             _masterData = masterData;
             _mapper = mapper;
+            _masterDataCache = masterDataCache;
         }
 
         [HttpGet]
@@ -71,6 +74,8 @@ namespace ASC.Web.Controllers
                 await _masterData.InsertMasterKeyAsync(masterKey);
             }
 
+            await _masterDataCache.CreateMasterDataCacheAsync();
+
             return RedirectToAction("MasterKeys");
 
         }
@@ -79,7 +84,7 @@ namespace ASC.Web.Controllers
         public async Task<IActionResult> MasterValues()
         {
             // Get All Master Keys and hold them in ViewBag for Select tag
-            ViewBag.MasterKeys = await _masterData.GetAllMasterKeysAsync();
+            ViewBag.MasterKeys = (await _masterData.GetAllMasterKeysAsync()).Where(k => k.IsActive).ToList();
 
             return View(new MasterValuesViewModel
             {
@@ -115,6 +120,8 @@ namespace ASC.Web.Controllers
                 await _masterData.InsertMasterValueAsync(masterDataValue);
             }
 
+            await _masterDataCache.CreateMasterDataCacheAsync();
+
             return Json("True");
         }
 
@@ -144,7 +151,7 @@ namespace ASC.Web.Controllers
             var masterData = await ParseMasterDataExcel(excelFile);
             var result = await _masterData.UploadBulkMasterData(masterData);
 
-            //await _masterDataCache.CreateMasterDataCacheAsync();
+            await _masterDataCache.CreateMasterDataCacheAsync();
 
             return Json(new { Success = result });
         }
