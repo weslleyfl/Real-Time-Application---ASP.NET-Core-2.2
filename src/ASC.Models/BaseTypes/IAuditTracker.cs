@@ -4,6 +4,9 @@ using System.Text;
 
 namespace ASC.Models.BaseTypes
 {
+    /// <summary>
+    /// IAuditTracker capture audit records for log entries.
+    /// </summary>
     public interface IAuditTracker
     {
     }
