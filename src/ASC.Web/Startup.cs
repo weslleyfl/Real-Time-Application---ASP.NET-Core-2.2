@@ -31,6 +31,7 @@ using Newtonsoft.Json.Serialization;
 using ASC.Web.Data.Cache;
 using Microsoft.Extensions.Logging;
 using ASC.Web.Logger;
+using ASC.Web.Filters;
 
 namespace ASC.Web
 {
@@ -46,6 +47,8 @@ namespace ASC.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -115,6 +118,7 @@ namespace ASC.Web
 
             services.ConfigureApplicationCookie(options =>
             {
+
                 // Cookie settings
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
@@ -122,6 +126,7 @@ namespace ASC.Web
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.SlidingExpiration = true;
+
             });
 
 
@@ -153,10 +158,13 @@ namespace ASC.Web
             services.AddScoped<IMasterDataOperations, MasterDataOperations>();
             services.AddScoped<IMasterDataCacheOperations, MasterDataCacheOperations>();
             services.AddScoped<ILogDataOperations, LogDataOperations>();
+            services.AddScoped<CustomExceptionFilter>();
+
 
             services.AddMvc(options =>
             {
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                options.Filters.Add(typeof(CustomExceptionFilter)); // Add CustomExceptionFilter to filters collection
 
             })
               // By default, ASP.NET Core MVC serializes JSON data by using camel casing. To prevent that, we need
@@ -194,15 +202,18 @@ namespace ASC.Web
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                // app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+                //app.UseDirectoryBrowser();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                // app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseStatusCodePagesWithRedirects("/Home/Error/{0}");
 
             // configure the HTTP pipeline to use the session,
             app.UseSession();

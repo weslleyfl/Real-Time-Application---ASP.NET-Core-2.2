@@ -30,6 +30,11 @@ namespace ASC.DataAccess
             this.Scope = scope;
         }
 
+        /// <summary>
+        /// Cria Tabela no Azure Storage
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>T</returns>
         public async Task<T> AddAsync(T entity)
         {
             var entityToInsert = entity as BaseEntity;

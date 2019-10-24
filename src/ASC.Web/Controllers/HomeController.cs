@@ -44,6 +44,20 @@ namespace ASC.Web.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        public IActionResult Error(string id)
+        {
+            // we handled only the 404 status code. We can handle any other status codes similarly.
+            if (id == "404")
+                return View("NotFound");
+
+            if ((id == "401") && (User.Identity.IsAuthenticated))
+                return RedirectToPage("/AccessDenied", new { area = "Identity" });
+            else
+                return RedirectToAction("Login", "Account");
+
+            // return View();
+        }
+
         public IActionResult Dashboard()
         {
             return View();
