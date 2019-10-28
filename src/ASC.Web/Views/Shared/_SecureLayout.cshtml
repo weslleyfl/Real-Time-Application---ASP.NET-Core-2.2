@@ -28,7 +28,7 @@
                 <a href="#!email"><span class="white-text email">@currentUser.Email</span></a>
             </div>
         </li>
-        <li><a class="collapsible-header" asp-controller="Dashboard" asp-action="Dashboard"><i class="material-icons">dashboard</i>Dashboard</a></li>
+        <li><a class="collapsible-header" asp-area="ServiceRequests" asp-controller="Dashboard" asp-action="Dashboard"><i class="material-icons">dashboard</i>Dashboard</a></li>
 
         @*collapsible-accordion User Administration *@
         <li>
@@ -38,9 +38,9 @@
                     <div class="collapsible-body">
 
                         <ul>
-                            <li><a asp-controller="Customers" asp-action="Customers">Customers<i class="material-icons">account_box</i></a></li>
+                            <li><a asp-area="Accounts" asp-controller="Accounts" asp-action="Customers">Customers<i class="material-icons">account_box</i></a></li>
                             <li><a href="#!">Deactivate User<i class="material-icons">remove_circle</i></a></li>
-                            <li><a asp-controller="Engineers" asp-action="ServiceEngineers">Service Engineers<i class="material-icons">person_add</i></a></li>
+                            <li><a asp-area="Accounts" asp-controller="Accounts" asp-action="ServiceEngineers">Service Engineers<i class="material-icons">person_add</i></a></li>
                         </ul>
 
                     </div>
@@ -60,8 +60,8 @@
                     <a class="collapsible-header">Master Data<i class="material-icons">perm_data_setting</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a asp-controller="MasterData" asp-action="MasterKeys" class="collapsible-header">Master Keys<i class="material-icons">data_usage</i></a></li>
-                            <li><a asp-controller="MasterData" asp-action="MasterValues" class="collapsible-header">Master Values<i class="material-icons">settings_system_daydream</i></a></li>
+                            <li><a asp-area="Configuration" asp-controller="MasterData" asp-action="MasterKeys" class="collapsible-header">Master Keys<i class="material-icons">data_usage</i></a></li>
+                            <li><a asp-area="Configuration" asp-controller="MasterData" asp-action="MasterValues" class="collapsible-header">Master Values<i class="material-icons">settings_system_daydream</i></a></li>
                         </ul>
                     </div>
                 </li>
@@ -76,7 +76,7 @@
                     <a class="collapsible-header">Settings<i class="material-icons">settings</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a asp-controller="Profile" asp-action="Profile" class="collapsible-header">Profile<i class="material-icons">system_update_alt</i></a></li>
+                            <li><a asp-area="Accounts" asp-controller="Account" asp-action="Profile" class="collapsible-header">Profile<i class="material-icons">system_update_alt</i></a></li>
                             <li><a href="#!" id="ancrResetPassword">Reset Password<i class="material-icons">lock_outline</i></a></li>
                         </ul>
                     </div>

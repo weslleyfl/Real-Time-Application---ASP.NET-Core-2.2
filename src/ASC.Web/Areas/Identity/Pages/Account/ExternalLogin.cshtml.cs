@@ -82,7 +82,8 @@ namespace ASC.Web.Areas.Identity.Pages.Account
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 //return LocalRedirect(returnUrl);
-                return RedirectToAction("Dashboard", "Dashboard");
+                return RedirectToAction("Dashboard", "Dashboard", new { Area = "ServiceRequests" });
+
             }
             
             if (result.IsLockedOut)
@@ -134,7 +135,8 @@ namespace ASC.Web.Areas.Identity.Pages.Account
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        return RedirectToAction("Dashboard", "Dashboard");
+                        return RedirectToAction("Dashboard", "Dashboard", new { Area = "ServiceRequests" });
+                        //return RedirectToAction("Dashboard", "Dashboard");
                         //return LocalRedirect(returnUrl);
                     }
                 }

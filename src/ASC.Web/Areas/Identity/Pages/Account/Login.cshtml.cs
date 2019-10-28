@@ -108,7 +108,8 @@ namespace ASC.Web.Areas.Identity.Pages.Account
                     if (!String.IsNullOrWhiteSpace(returnUrl))
                         return LocalRedirect(returnUrl);
                     else
-                        return RedirectToAction("Dashboard", "Dashboard");
+                        //return RedirectToAction("Dashboard", "Dashboard");
+                        return RedirectToAction("Dashboard", "Dashboard", new { Area = "ServiceRequests" });
                 }
 
                 if (result.RequiresTwoFactor)
