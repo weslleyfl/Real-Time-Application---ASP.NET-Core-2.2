@@ -32,6 +32,8 @@ using ASC.Web.Data.Cache;
 using Microsoft.Extensions.Logging;
 using ASC.Web.Logger;
 using ASC.Web.Filters;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace ASC.Web
 {
@@ -159,6 +161,11 @@ namespace ASC.Web
             services.AddScoped<IMasterDataCacheOperations, MasterDataCacheOperations>();
             services.AddScoped<ILogDataOperations, LogDataOperations>();
             services.AddScoped<CustomExceptionFilter>();
+            services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
+
+            // Resolving IIdentitySeed dependency in Startup class
+            services.AddSingleton<IIdentitySeed, IdentitySeed>();
+            services.AddTransient<IEmailSender, AuthMessageSender>();
 
 
             services.AddMvc(options =>
@@ -173,13 +180,18 @@ namespace ASC.Web
               .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
 
-            // Resolving IIdentitySeed dependency in Startup class
-            services.AddSingleton<IIdentitySeed, IdentitySeed>();
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-
             // If you are using AspNet Core 2.2 and AutoMapper.Extensions.Microsoft.DependencyInjection v6.1 You need to use in Startup file
             // Automapper
             services.AddAutoMapper(typeof(Startup));
+
+            // To consume the left navigation view component, we need to install the Microsoft.Extensions.FileProviders.Embedded NuGet package to the ASC.Web project
+            // Add support to embedded views from ASC.Utilities project.
+            var assembly = typeof(ASC.Utilities.Navigation.LeftNavigationViewComponent).GetTypeInfo().Assembly;
+            var embeddedFileProvider = new EmbeddedFileProvider(assembly, "ASC.Utilities");
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.FileProviders.Add(embeddedFileProvider);
+            });
 
 
         }
@@ -191,6 +203,7 @@ namespace ASC.Web
                                     IIdentitySeed storageSeed,
                                     IUnitOfWork unitOfWork,
                                     IMasterDataCacheOperations masterDataCacheOperations,
+                                    INavigationCacheOperations navigationCacheOperations,
                                     ILogDataOperations logDataOperations)
         {
 
@@ -261,6 +274,8 @@ namespace ASC.Web
             }
 
             await masterDataCacheOperations.CreateMasterDataCacheAsync();
+
+            await navigationCacheOperations.CreateNavigationCacheAsync();
 
 
         }

@@ -139,18 +139,18 @@ namespace ASC.Web.Areas.Accounts.Controllers
             }
 
             // TODO: Não enviar email engineers
-            //if (serviceEngineer.Registration.IsActive)
-            //{
-            //    await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
-            //        "Account Created/Modified",
-            //        $"Email : {serviceEngineer.Registration.Email} /n Passowrd : {serviceEngineer.Registration.Password}");
-            //}
-            //else
-            //{
-            //    await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
-            //        "Account Deactivated",
-            //        $"Your account has been deactivated.");
-            //}
+            if (serviceEngineer.Registration.IsActive)
+            {
+                await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
+                    "Account Created/Modified",
+                    $"Email : {serviceEngineer.Registration.Email} /n Passowrd : {serviceEngineer.Registration.Password}");
+            }
+            else
+            {
+                await _emailSender.SendEmailAsync(serviceEngineer.Registration.Email,
+                    "Account Deactivated",
+                    $"Your account has been deactivated.");
+            }
 
             return RedirectToAction("ServiceEngineers");
         }

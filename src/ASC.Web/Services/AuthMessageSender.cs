@@ -35,7 +35,8 @@ namespace ASC.Web.Services
             {
                 await client.ConnectAsync(_settings.Value.SMTPServer, _settings.Value.SMTPPort, false);
                 //await client.AuthenticateAsync(_settings.Value.SMTPAccount, _settings.Value.SMTPPassword);
-                await client.SendAsync(emailMessage);
+                // TODO: Email nao enviado - desabilitado
+                //await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
 

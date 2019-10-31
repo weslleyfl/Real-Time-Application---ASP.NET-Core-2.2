@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ASC.Models.BaseTypes;
 using ASC.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -132,6 +133,9 @@ namespace ASC.Web.Areas.Identity.Pages.Account
 
                     if (result.Succeeded)
                     {
+                        // Add to USER roles
+                        await _userManager.AddToRoleAsync(user, nameof(Roles.User));
+
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
