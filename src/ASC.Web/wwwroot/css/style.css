@@ -128,7 +128,6 @@ header.secureLayout, main.secureLayout, footer.secureLayout {
 }
 
 
-
 /*Pagina ServiceEngineers*/
 
 .padding-bottom-15px {
@@ -137,4 +136,14 @@ header.secureLayout, main.secureLayout, footer.secureLayout {
 
 .cursor-hand {
     cursor: pointer
+}
+
+/*To support vertical scroll bar for active service engineers section*/
+
+.height-300px {
+    height: 300px;
+}
+
+.overflow-y {
+    overflow-y: auto;
 }

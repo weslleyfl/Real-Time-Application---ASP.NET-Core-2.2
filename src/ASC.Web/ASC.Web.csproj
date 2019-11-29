@@ -15,6 +15,7 @@
     <PackageReference Include="MailKit" Version="2.3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
@@ -37,7 +38,6 @@
     <Folder Include="Areas\Accounts\Data\" />
     <Folder Include="Areas\Configuration\Data\" />
     <Folder Include="Areas\ServiceRequests\Data\" />
-    <Folder Include="Areas\ServiceRequests\Models\" />
   </ItemGroup>
 
 

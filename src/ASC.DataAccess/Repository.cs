@@ -180,5 +180,22 @@ namespace ASC.DataAccess
                 await table.ExecuteAsync(replaceOperation);
             }
         }
+
+        public async Task<IEnumerable<T>> FindAllByQuery(string query)
+        {
+            TableContinuationToken tableContinuationToken = null;
+            var result = await storageTable.ExecuteQuerySegmentedAsync(new TableQuery<T>().Where(query), tableContinuationToken);
+
+            return result.Results as IEnumerable<T>;
+        }
+
+        public async Task<IEnumerable<T>> FindAllInAuditByQuery(string query)
+        {
+            var auditTable = tableClient.GetTableReference($"{typeof(T).Name}Audit");
+            TableContinuationToken tableContinuationToken = null;
+            var result = await auditTable.ExecuteQuerySegmentedAsync(new TableQuery<T>().Take(20).Where(query), tableContinuationToken);
+
+            return result.Results as IEnumerable<T>;
+        }
     }
 }
