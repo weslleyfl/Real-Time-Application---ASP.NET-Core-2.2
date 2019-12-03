@@ -8,6 +8,7 @@ namespace ASC.Web.Areas.ServiceRequests.Models
         public ServiceRequestMappingProfile()
         {
             CreateMap<ServiceRequest, NewServiceRequestViewModel>().ReverseMap();
+            CreateMap<ServiceRequest, UpdateServiceRequestViewModel>().ReverseMap();
         }
     }
 }

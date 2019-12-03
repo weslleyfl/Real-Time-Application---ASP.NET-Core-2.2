@@ -77,6 +77,25 @@
             // Set Styles for DataTable and Number of Records to be displayed dropdown
             $('.tblServiceRequests').css("width", "100%");
             $('select[name$="ServiceRequests_length"]').material_select();
+
+
+            // On click of View icon, redirect to Service Request Details View based on RowKey
+            $(document).on('click', '.view', function () {
+
+                var tableId = '#' + $(this).parents('table').attr('id');
+                var serviceRequest = $(tableId).DataTable().row($(this).parents('tr')).data();
+
+                // For Service Request Table, populate id with RowKey
+                var id = serviceRequest[0];
+                 // For Service Request Audit Table, populate id by spliting the Partition key with '-'
+                if (tableId.indexOf('Audit') >= 0)
+                    id = serviceRequest[1].substring(serviceRequest[1].indexOf('-') + 1, serviceRequest[1].length);
+
+                window.location.href = '@Url.Action("ServiceRequestDetails","ServiceRequest", new { Area = "ServiceRequests" })?Id=' + id;
+
+            });
+
+
         });
 
 

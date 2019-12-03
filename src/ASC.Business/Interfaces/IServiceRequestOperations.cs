@@ -19,5 +19,7 @@ namespace ASC.Business.Interfaces
 
         Task<List<ServiceRequest>> GetServiceRequestsFormAudit(string serviceEngineerEmail = "");
         Task<List<ServiceRequest>> GetActiveServiceRequests(List<string> status);
+        Task<ServiceRequest> GetServiceRequestByRowKey(string id);
+        Task<List<ServiceRequest>> GetServiceRequestAuditByPartitionKey(string id);
     }
 }

@@ -79,5 +79,20 @@ namespace ASC.Business
             return serviceRequests.ToList();
 
         }
+
+        public async Task<ServiceRequest> GetServiceRequestByRowKey(string id)
+        {
+            var query = Queries.GetServiceRequestDetailsQuery(id);
+            var serviceRequests = await _unitOfWork.Repository<ServiceRequest>().FindAllByQuery(query);
+
+            return serviceRequests.FirstOrDefault();
+        }
+
+        public async Task<List<ServiceRequest>> GetServiceRequestAuditByPartitionKey(string id)
+        {
+            var query = Queries.GetServiceRequestAuditDetailsQuery(id);
+            var serviceRequests = await _unitOfWork.Repository<ServiceRequest>().FindAllInAuditByQuery(query);
+            return serviceRequests.ToList();
+        }
     }
 }
