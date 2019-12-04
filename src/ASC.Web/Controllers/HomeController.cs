@@ -9,6 +9,7 @@ using ASC.Web.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using ASC.Utilities;
+using Microsoft.AspNetCore.Localization;
 
 namespace ASC.Web.Controllers
 {
@@ -61,6 +62,24 @@ namespace ASC.Web.Controllers
         public IActionResult Dashboard()
         {
             return View();
+        }   
+
+        [HttpPost]
+        public IActionResult SetCulture(string culture, string returnUrl)
+        {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddYears(1),
+                    IsEssential = true,  //critical settings to apply new culture
+                    Path = "/",
+                    HttpOnly = false,
+                }
+            );
+
+            return LocalRedirect(returnUrl);
         }
 
     }

@@ -145,5 +145,20 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
 
             return RedirectToAction("ServiceRequestDetails", "ServiceRequest", new { Area = "ServiceRequests", Id = serviceRequest.RowKey });
         }
+
+        [AcceptVerbs("GET", "POST")]
+        //public async Task<IActionResult> CheckDenialService(DateTime requestedDate)
+        public async Task<IActionResult> CheckDenialService()
+        {
+            var serviceRequests = await _serviceRequestOperations.GetServiceRequestsByRequestedDateAndStatus(
+                                                                    DateTime.UtcNow.AddDays(-90),
+                                                                    new List<string>() { nameof(Status.Denied) },
+                                                                    HttpContext.User.GetCurrentUserDetails().Email);
+
+            if (serviceRequests.Any())
+                return Json(data: $"Há uma solicitação de serviço negada para você nos últimos 90 dias. Entre em contato com o administrador da ASC.");
+
+            return Json(data: true);
+        }
     }
 }

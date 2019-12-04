@@ -2,6 +2,8 @@
 @using ASC.Models.BaseTypes
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor UserHttpContext
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResources> SharedLocalizer
 
 @{
     Layout = "_SecureLayout";
@@ -9,7 +11,7 @@
 <div class="row"></div>
 
 @await Html.PartialAsync("_ServiceRequestGrid", Model.ServiceRequests, new ViewDataDictionary(ViewData) {
-                                                                        { "SectionName", "Service Requests" },
+                                                                        { "SectionName", SharedLocalizer["SectionHeader_ServiceRequests_Text"] },
                                                                         { "Id", "tblServiceRequests" },
                                                                         { "IsAudit", false }
                                                                         })
