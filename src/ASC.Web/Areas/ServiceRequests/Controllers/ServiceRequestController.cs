@@ -14,6 +14,7 @@ using ASC.Web.Controllers;
 using ASC.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using ASC.Web.Services;
 
 namespace ASC.Web.Areas.ServiceRequests.Controllers
 {
@@ -25,18 +26,20 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
         private readonly IMasterDataCacheOperations _masterData;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ISmsSender _smsSender;
 
         public ServiceRequestController(IServiceRequestOperations operations,
               IMapper mapper,
               IMasterDataCacheOperations masterData,
               UserManager<ApplicationUser> userManager,
-              IEmailSender emailSender)
+              IEmailSender emailSender, ISmsSender smsSender)
         {
             _serviceRequestOperations = operations;
             _mapper = mapper;
             _masterData = masterData;
             _userManager = userManager;
             _emailSender = emailSender;
+            _smsSender = smsSender;
         }
 
         [HttpGet]
@@ -118,12 +121,24 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             var originalServiceRequest = await _serviceRequestOperations.GetServiceRequestByRowKey(serviceRequest.RowKey);
             originalServiceRequest.RequestedServices = serviceRequest.RequestedServices;
 
+            // Exercise 1
+            // Send an Email alert to customer when his service request is marked as PendingCustomerApproval either by
+            // Admin and Service Engineer.
+            var isServiceRequestStatusUpdated = false;
+
             // Update Status only if user role is either Admin or Engineer
             // Or Customer can update the status if it is only in Pending Customer Approval.
             if (HttpContext.User.IsInRole(Roles.Admin.ToString()) ||
                 HttpContext.User.IsInRole(Roles.Engineer.ToString()) ||
                 (HttpContext.User.IsInRole(Roles.User.ToString()) && originalServiceRequest.Status == Status.PendingCustomerApproval.ToString()))
             {
+
+                // Exercise 1
+                if (originalServiceRequest.Status != serviceRequest.Status)
+                {
+                    isServiceRequestStatusUpdated = true;
+                }
+
                 originalServiceRequest.Status = serviceRequest.Status;
             }
 
@@ -143,7 +158,38 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
                         "Please visit the ASC application and review your Service request.");
             }
 
+            // Exercise 1
+            if (isServiceRequestStatusUpdated)
+            {
+                await SendSmsAndWebNotifications(originalServiceRequest);
+            }
+
             return RedirectToAction("ServiceRequestDetails", "ServiceRequest", new { Area = "ServiceRequests", Id = serviceRequest.RowKey });
+        }
+
+        private async Task SendSmsAndWebNotifications(ServiceRequest serviceRequest)
+        {
+            var phoneNumber = (await _userManager.FindByEmailAsync(serviceRequest.PartitionKey)).PhoneNumber;
+
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                await _smsSender.SendSmsAsync(string.Format("+91{0}", phoneNumber),
+                            string.Format("Service Request Status updated to {0}", serviceRequest.Status));
+            }
+
+            // Get Customer name
+            var customerName = (await _userManager.FindByEmailAsync(serviceRequest.PartitionKey)).UserName;
+
+
+            // Send web notifications
+            //_signalRConnectionManager.GetHubContext<ServiceMessagesHub>()
+            //   .Clients
+            //   .User(customerName)
+            //   .publishNotification(new
+            //   {
+            //       status = serviceRequest.Status
+            //   });
+
         }
 
         [AcceptVerbs("GET", "POST")]
@@ -160,5 +206,33 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
 
             return Json(data: true);
         }
+
+        [HttpGet]
+        public IActionResult SearchServiceRequests()
+        {
+            return View(new SearchServiceRequestsViewModel());
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> SearchServiceRequestResults(string email, DateTime? requestedDate)
+        {
+            List<ServiceRequest> results = new List<ServiceRequest>();
+
+            if (string.IsNullOrEmpty(email) && (!requestedDate.HasValue))
+                return Json(new { data = results });
+
+            if (HttpContext.User.IsInRole(nameof(Roles.Admin)))
+                results = await _serviceRequestOperations
+                                    .GetServiceRequestsByRequestedDateAndStatus(requestedDate, null, email);
+            else
+                results = await _serviceRequestOperations
+                                    .GetServiceRequestsByRequestedDateAndStatus(requestedDate, null, HttpContext.User.GetCurrentUserDetails().Email);
+
+            return Json(new { data = results.OrderByDescending(p => p.RequestedDate).ToList() });
+
+        }
+
+
     }
 }

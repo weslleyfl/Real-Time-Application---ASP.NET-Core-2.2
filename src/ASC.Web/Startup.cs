@@ -174,6 +174,7 @@ namespace ASC.Web
             // Resolving IIdentitySeed dependency in Startup class
             services.AddSingleton<IIdentitySeed, IdentitySeed>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
+            services.AddTransient<ISmsSender, AuthMessageSender>();
 
             // services.Add(new ServiceDescriptor(typeof(IEmailSender), typeof(AuthMessageSender), ServiceLifetime.Transient));
 

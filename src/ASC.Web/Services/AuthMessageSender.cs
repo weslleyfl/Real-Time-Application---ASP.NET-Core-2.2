@@ -7,10 +7,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace ASC.Web.Services
 {
-    public class AuthMessageSender : IEmailSender
+    public class AuthMessageSender : IEmailSender, ISmsSender
     {
         private IOptions<ApplicationSettings> _settings;
 
@@ -40,6 +43,22 @@ namespace ASC.Web.Services
                 await client.DisconnectAsync(true);
             }
 
+        }
+
+        public async Task SendSmsAsync(string number, string message)
+        {
+
+            //return await Task.Run(() => string.Empty).ConfigureAwait(false);
+            await Task.Factory.StartNew(() => string.Empty );
+
+            // TODO: SMS esta desabilitado
+
+            TwilioClient.Init(_settings.Value.TwilioAccountSID, _settings.Value.TwilioAuthToken);
+
+            var smsMessage = await MessageResource.CreateAsync(
+                to: new PhoneNumber(number),
+                from: new PhoneNumber(_settings.Value.TwilioPhoneNumber),
+                body: message);
         }
     }
 }
