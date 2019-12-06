@@ -25,7 +25,8 @@
     public enum MasterKeys
     {
         VehicleName,
-        VehicleType
+        VehicleType,
+        PromotionType
     }
 
     public enum Status

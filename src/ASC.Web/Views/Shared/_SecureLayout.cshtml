@@ -106,6 +106,28 @@
 <form class="hide" method="post" id="resetPassword_form" asp-area="Identity" asp-page="/Account/Register" asp-page-handler="InitiateResetPassword">
 </form>
 
+<!-- Tap Target Structure -->
+<div class="tap-target cyan hide" data-activates="serviceNotification">
+    <div class="tap-target-content white-text">
+        <h5 class="padding-left-50px">Status Updated!!!</h5>
+        <p class="white-text padding-left-50px divNotification">The Status of your Service Request has been changed to {$}.</p>
+    </div>
+</div>
+
+<!-- Promotion Template -->
+<div class="promotionTemplate hide">
+    <div class="col s12 m5">
+        <div class="card {Style}">
+            <div class="card-content white-text">
+                <span class="card-title">{Header}</span>
+                <p>
+                    {Content}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts{
 
@@ -123,6 +145,43 @@
             });
         });
 
+
+            // Listing 11-36. JQuery code to show tap target notification - SIGNALR
+        /*
+        $.connection.serviceMessagesHub.client.publishNotification = showNotification;
+        $.connection.serviceMessagesHub.client.publishPromotion = showPromotion;
+        
+        function showNotification(data) {
+            var notificationText = $('.divNotification').html();
+            $('.divNotification').html(notificationText.replace('{$}', data.status));
+            $('.tap-target').removeClass('hide');
+            $('.tap-target').tapTarget('open');
+            setTimeout(function () {
+                $('.tap-target').tapTarget('close');
+                $('.tap-target').addClass('hide');;
+            }, 5000);
+        };
+
+            var counter = 0
+            function showPromotion(data) {
+                counter++;
+                var promotionTemplate = $('.promotionTemplate').clone().html();
+                promotionTemplate = promotionTemplate.replace('{Header}', data.Header);
+                promotionTemplate = promotionTemplate.replace('{Content}', data.Content);
+                promotionTemplate = promotionTemplate.replace('{Style}', data.PartitionKey == 'Discount' ? 'light-green darken-2' : 'light-blue darken-2');
+
+                // Prepend newly added promotion to to divPromotions on Promotions view.
+                $('.divPromotions').prepend(promotionTemplate);
+
+                // show notification counter on the left navigation menu item.
+                $('#ancrPromotions .badge').remove();
+                $('#ancrPromotions').prepend('<span class="new badge">' + counter + '</span>');
+            };
+
+            // Start the client side HUB
+            $.connection.hub.start();
+
+        */
 
     </script>
 

@@ -170,6 +170,9 @@ namespace ASC.Web
             services.AddScoped<CustomExceptionFilter>();
             services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
             services.AddScoped<IServiceRequestOperations, ServiceRequestOperations>();
+            services.AddScoped<IServiceRequestMessageOperations, ServiceRequestMessageOperations>();
+            services.AddScoped<IOnlineUsersOperations, OnlineUsersOperations>();
+            services.AddScoped<IPromotionOperations, PromotionOperations>();
 
             // Resolving IIdentitySeed dependency in Startup class
             services.AddSingleton<IIdentitySeed, IdentitySeed>();

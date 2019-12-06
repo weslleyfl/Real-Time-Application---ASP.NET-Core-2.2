@@ -147,3 +147,21 @@ header.secureLayout, main.secureLayout, footer.secureLayout {
 .overflow-y {
     overflow-y: auto;
 }
+
+/*SignalR*/
+
+.padding-10px {
+    padding: 10px;
+}
+
+.font-size-12px {
+    font-size: 12px;
+}
+
+.padding-top-10px {
+    padding-top: 10px !important;
+}
+
+.padding-left-50px {
+    padding-left: 50px;
+}

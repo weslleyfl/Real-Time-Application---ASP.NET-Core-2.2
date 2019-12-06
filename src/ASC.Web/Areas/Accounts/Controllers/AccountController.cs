@@ -215,6 +215,7 @@ namespace ASC.Web.Areas.Accounts.Controllers
             var profileModel = new ProfileViewModel
             {
                 UserName = user.UserName,
+                Phone = user.PhoneNumber,
                 IsEditSuccess = false
             };
 
@@ -232,6 +233,7 @@ namespace ASC.Web.Areas.Accounts.Controllers
 
             var user = await _userManager.FindByEmailAsync(HttpContext.User.GetCurrentUserDetails().Email);
             user.UserName = profile.UserName;
+            user.PhoneNumber = profile.Phone;
 
             var result = await _userManager.UpdateAsync(user);
             await _signInManager.SignOutAsync();

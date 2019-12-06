@@ -117,6 +117,42 @@
                                                                                     { "Id", "tblAuditServiceRequests" },
                                                                                     { "IsAudit", true }
                                                                                 })
+
+    @* Messages Section *@
+    <input type="hidden" id="hdnCustomerEmail" value="@Model.ServiceRequest.PartitionKey" />
+    <div class="row">
+        <div class="col s8">
+            <ul class="collection with-header">
+                <li class="row collection-header">
+                    <div class="col s6"><h5>Service Request Messages</h5></div>
+                    <div class="col s6 padding-top-10px right">
+                        <div class="col chip right">
+                            User
+                            <img src="/images/red_dot.png" data-id="isCu">
+                        </div>
+                        <div class="col chip right">
+                            Admin
+                            <img src="/images/red_dot.png" data-id="isAd">
+                        </div>
+                        <div class="col chip right">
+                            Engineer
+                            <img src="/images/red_dot.png" data-id="isSe">
+                        </div>
+                    </div>
+                </li>
+                <li class="collection-item height-300px overflow-y messages">
+                    <ul id="messagesList"></ul>
+                    <div class="card-panel teal lighten-2 white-text noMessages hide">No Messages.</div>
+                </li>
+            </ul>
+            <div class="input-field col s12">
+                <input type="text" id="txtMessage" />
+                <label for="txtMessage">Type message here and press enter.</label>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 

@@ -133,7 +133,7 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
                 (HttpContext.User.IsInRole(Roles.User.ToString()) && originalServiceRequest.Status == Status.PendingCustomerApproval.ToString()))
             {
 
-                // Exercise 1
+                // SMS
                 if (originalServiceRequest.Status != serviceRequest.Status)
                 {
                     isServiceRequestStatusUpdated = true;
@@ -158,7 +158,7 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
                         "Please visit the ASC application and review your Service request.");
             }
 
-            // Exercise 1
+            // Send SMS
             if (isServiceRequestStatusUpdated)
             {
                 await SendSmsAndWebNotifications(originalServiceRequest);
@@ -169,6 +169,7 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
 
         private async Task SendSmsAndWebNotifications(ServiceRequest serviceRequest)
         {
+            // Send SMS Notification
             var phoneNumber = (await _userManager.FindByEmailAsync(serviceRequest.PartitionKey)).PhoneNumber;
 
             if (!string.IsNullOrWhiteSpace(phoneNumber))
