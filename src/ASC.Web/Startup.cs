@@ -36,6 +36,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Mvc.Razor;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using ASC.Web.ServiceHub;
 
 namespace ASC.Web
 {
@@ -181,6 +182,9 @@ namespace ASC.Web
 
             // services.Add(new ServiceDescriptor(typeof(IEmailSender), typeof(AuthMessageSender), ServiceLifetime.Transient));
 
+            // DI SignalR
+            services.AddSignalR();
+
             services.AddMvc(options =>
             {
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -280,6 +284,14 @@ namespace ASC.Web
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+
+            // register middleware for SignalR
+            app.UseSignalR(routes =>
+            {
+                // the url most start with lower letter
+                routes.MapHub<ServiceMessagesHub>("/serviceMessagesHub");
             });
 
             // Once you've registered all your classes with the DI container (using IServiceCollection), 

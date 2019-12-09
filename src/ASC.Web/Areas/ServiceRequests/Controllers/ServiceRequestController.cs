@@ -15,6 +15,10 @@ using ASC.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ASC.Web.Services;
+using Microsoft.Extensions.Options;
+using ASC.Web.Configuration;
+using Microsoft.AspNetCore.SignalR;
+using ASC.Web.ServiceHub;
 
 namespace ASC.Web.Areas.ServiceRequests.Controllers
 {
@@ -28,11 +32,20 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
 
+        private readonly IServiceRequestMessageOperations _serviceRequestMessageOperations;
+        //private readonly IConnectionManager _signalRConnectionManager;
+        private readonly IHubContext<ServiceMessagesHub> _signalRConnectionManager;
+        private readonly IOptions<ApplicationSettings> _options;
+
         public ServiceRequestController(IServiceRequestOperations operations,
               IMapper mapper,
               IMasterDataCacheOperations masterData,
               UserManager<ApplicationUser> userManager,
-              IEmailSender emailSender, ISmsSender smsSender)
+              IEmailSender emailSender,
+              ISmsSender smsSender,
+              IServiceRequestMessageOperations serviceRequestMessageOperations,
+              IHubContext<ServiceMessagesHub> signalRConnectionManager,
+              IOptions<ApplicationSettings> options)
         {
             _serviceRequestOperations = operations;
             _mapper = mapper;
@@ -40,6 +53,9 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             _userManager = userManager;
             _emailSender = emailSender;
             _smsSender = smsSender;
+            _serviceRequestMessageOperations = serviceRequestMessageOperations;
+            _signalRConnectionManager = signalRConnectionManager;
+            _options = options;
         }
 
         [HttpGet]
@@ -193,9 +209,8 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
 
         }
 
-        [AcceptVerbs("GET", "POST")]
-        //public async Task<IActionResult> CheckDenialService(DateTime requestedDate)
-        public async Task<IActionResult> CheckDenialService()
+        [AcceptVerbs("GET", "POST")]        
+        public async Task<IActionResult> CheckDenialService(DateTime requestedDate)
         {
             var serviceRequests = await _serviceRequestOperations.GetServiceRequestsByRequestedDateAndStatus(
                                                                     DateTime.UtcNow.AddDays(-90),
@@ -213,7 +228,6 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
         {
             return View(new SearchServiceRequestsViewModel());
         }
-
 
         [HttpGet]
         public async Task<IActionResult> SearchServiceRequestResults(string email, DateTime? requestedDate)
@@ -234,6 +248,122 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ServiceRequestMessages(string serviceRequestId)
+        {
+            return Json((await _serviceRequestMessageOperations.GetServiceRequestMessageAsync(serviceRequestId)).OrderByDescending(p => p.MessageDate));
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateServiceRequestMessage(ServiceRequestMessage menssagem)
+        {
+            // Message and Service Request Id (Service request Id is the partition key for a message)
+            if (string.IsNullOrWhiteSpace(menssagem.Message) || string.IsNullOrWhiteSpace(menssagem.PartitionKey))
+                return Json(false);
+
+            // Get Service Request details
+            var serviceRequesrDetails = await _serviceRequestOperations.GetServiceRequestByRowKey(menssagem.PartitionKey);
+
+            // Populate message details
+            menssagem.FromEmail = HttpContext.User.GetCurrentUserDetails().Email;
+            menssagem.FromDisplayName = HttpContext.User.GetCurrentUserDetails().Name;
+            menssagem.MessageDate = DateTime.UtcNow;
+            menssagem.RowKey = Guid.NewGuid().ToString();
+
+            // Get Customer and Service Engineer names
+            var customerName = (await _userManager.FindByEmailAsync(serviceRequesrDetails.PartitionKey)).UserName;
+            var serviceEngineerName = string.Empty;
+            if (!string.IsNullOrWhiteSpace(serviceRequesrDetails.ServiceEngineer))
+            {
+                serviceEngineerName = (await _userManager.FindByEmailAsync(serviceRequesrDetails.ServiceEngineer)).UserName;
+            }
+            var adminName = (await _userManager.FindByEmailAsync(_options.Value.AdminEmail)).UserName;
+
+            // Save the message to Azure Storage
+            await _serviceRequestMessageOperations.CreateServiceRequestMessageAsync(menssagem);
+
+            var users = new List<string> { customerName, adminName };
+            if (!string.IsNullOrWhiteSpace(serviceEngineerName))
+            {
+                users.Add(serviceEngineerName);
+            }
+
+            // Broadcast the message to all clients asscoaited with Service Request
+            //_signalRConnectionManager. GetHubContext<ServiceMessagesHub>()
+            //    .Clients
+            //    .Users(users)
+            //    .publishMessage(message);
+
+
+            //await _signalRConnectionManager.Clients.All.SendAsync("ReceiveMessage", message);
+            //await _signalRConnectionManager.Clients.Users(users).SendAsync("publishMessage", message);
+            await _signalRConnectionManager.Clients.All.SendAsync("publishMessage", menssagem);
+
+            // Return true
+            return Json(true);
+        }
+
+        /*
+
+        [HttpGet]
+        public async Task<IActionResult> MarkOfflineUser()
+        {
+            // Delete the current logged in user from OnlineUsers entity
+            await _onlineUsersOperations.DeleteOnlineUserAsync(HttpContext.User.GetCurrentUserDetails().Email);
+
+            string serviceRequestId = HttpContext.Request.Headers["ServiceRequestId"];
+            // Get Service Request Details
+            var serviceRequest = await _serviceRequestOperations.GetServiceRequestByRowKey(serviceRequestId);
+
+            // Get Customer and Service Engineer names
+            var customerName = (await _userManager.FindByEmailAsync(serviceRequest.PartitionKey)).UserName;
+            var serviceEngineerName = string.Empty;
+            if (!string.IsNullOrWhiteSpace(serviceRequest.ServiceEngineer))
+            {
+                serviceEngineerName = (await _userManager.FindByEmailAsync(serviceRequest.ServiceEngineer)).UserName;
+            }
+            var adminName = (await _userManager.FindByEmailAsync(_options.Value.AdminEmail)).UserName;
+
+            // check Admin, Service Engineer and customer are connected.
+            var isAdminOnline = await _onlineUsersOperations.GetOnlineUserAsync(_options.Value.AdminEmail);
+            var isServiceEngineerOnline = false;
+            if (!string.IsNullOrWhiteSpace(serviceRequest.ServiceEngineer))
+            {
+                isServiceEngineerOnline = await _onlineUsersOperations.GetOnlineUserAsync(serviceRequest.ServiceEngineer);
+            }
+            var isCustomerOnline = await _onlineUsersOperations.GetOnlineUserAsync(serviceRequest.PartitionKey);
+
+            List<string> users = new List<string>();
+            if (isAdminOnline) users.Add(adminName);
+            if (!string.IsNullOrWhiteSpace(serviceEngineerName))
+            {
+                if (isServiceEngineerOnline) users.Add(serviceEngineerName);
+            }
+            if (isCustomerOnline) users.Add(customerName);
+
+            // Send notifications
+            //_signalRConnectionManager.GetHubContext<ServiceMessagesHub>()
+            //   .Clients
+            //   .Users(users)
+            //   .online(new
+            //   {
+            //       isAd = isAdminOnline,
+            //       isSe = isServiceEngineerOnline,
+            //       isCu = isCustomerOnline
+            //   });
+
+            await _signalRConnectionManager.Clients.Users(users).SendAsync("online", new
+            {
+                isAd = isAdminOnline,
+                isSe = isServiceEngineerOnline,
+                isCu = isCustomerOnline
+            });
+
+            return Json(true);
+        }
+
+        */
 
     }
 }

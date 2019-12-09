@@ -133,6 +133,11 @@
 
     @RenderSection("Scripts", required: false)
 
+    @*<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>*@
+    <!--include library of signalr.js-->
+    @*<script type="text/javascript" src="~/lib/signalr/signalr.min.js"></script>*@
+
+
     <script type="text/javascript">
 
         $(function () {
@@ -146,11 +151,32 @@
         });
 
 
-            // Listing 11-36. JQuery code to show tap target notification - SIGNALR
+        // Listing 11-36. JQuery code to show tap target notification - SIGNALR
+        
+       //$(function () {
+       //     //<!--Connect to server hub: eventHub, transport type default would be: websocket-->
+       //     var connection = new signalR.HubConnectionBuilder()
+       //                          .withUrl("/serviceMessagesHub")
+       //                          .build();           
+
+       //     //<!--error logging-->
+       //     connection.start().catch(function (err) {
+       //         return console.error(err.toString());
+       //     });
+            
+       // });
+
+    
+
+        // Start the client side HUB
+        //$.connection.hub.start().catch(function (err) {
+        //    return console.error(err.toString());
+        //});;
+
         /*
         $.connection.serviceMessagesHub.client.publishNotification = showNotification;
         $.connection.serviceMessagesHub.client.publishPromotion = showPromotion;
-        
+
         function showNotification(data) {
             var notificationText = $('.divNotification').html();
             $('.divNotification').html(notificationText.replace('{$}', data.status));

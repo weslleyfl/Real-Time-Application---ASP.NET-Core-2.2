@@ -48,8 +48,8 @@ namespace ASC.Business
 
         public async Task<bool> GetOnlineUserAsync(string name)
         {
-             var user = await _unitOfWork.Repository<OnlineUser>().FindAllByPartitionKeyAsync(name);
-            return user.Any() && user.FirstOrDefault().IsDeleted != true;
+            var user = await _unitOfWork.Repository<OnlineUser>().FindAllByPartitionKeyAsync(name);
+            return user.Any() && !user.FirstOrDefault().IsDeleted;
         }
     }
 }
