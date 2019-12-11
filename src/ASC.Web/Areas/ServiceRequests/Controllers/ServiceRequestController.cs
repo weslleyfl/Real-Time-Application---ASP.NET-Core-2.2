@@ -19,6 +19,7 @@ using Microsoft.Extensions.Options;
 using ASC.Web.Configuration;
 using Microsoft.AspNetCore.SignalR;
 using ASC.Web.ServiceHub;
+using Microsoft.AspNetCore.Http;
 
 namespace ASC.Web.Areas.ServiceRequests.Controllers
 {
@@ -31,11 +32,12 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
-
         private readonly IServiceRequestMessageOperations _serviceRequestMessageOperations;
         //private readonly IConnectionManager _signalRConnectionManager;
         private readonly IHubContext<ServiceMessagesHub> _signalRConnectionManager;
         private readonly IOptions<ApplicationSettings> _options;
+        private readonly IOnlineUsersOperations _onlineUsersOperations;
+        private readonly IHttpContextAccessor _userHttpContext;
 
         public ServiceRequestController(IServiceRequestOperations operations,
               IMapper mapper,
@@ -45,7 +47,9 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
               ISmsSender smsSender,
               IServiceRequestMessageOperations serviceRequestMessageOperations,
               IHubContext<ServiceMessagesHub> signalRConnectionManager,
-              IOptions<ApplicationSettings> options)
+              IOptions<ApplicationSettings> options,
+              IOnlineUsersOperations onlineUsersOperations,
+              IHttpContextAccessor userHttpContext)
         {
             _serviceRequestOperations = operations;
             _mapper = mapper;
@@ -56,6 +60,11 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             _serviceRequestMessageOperations = serviceRequestMessageOperations;
             _signalRConnectionManager = signalRConnectionManager;
             _options = options;
+            _onlineUsersOperations = onlineUsersOperations;
+            _userHttpContext = userHttpContext;
+
+            ServiceMessagesHub.GetWebRequest(_userHttpContext.HttpContext.Request.Headers["ServiceRequestId"]);
+
         }
 
         [HttpGet]
@@ -207,9 +216,11 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             //       status = serviceRequest.Status
             //   });
 
+            await _signalRConnectionManager.Clients.All.SendAsync("publishNotification", new { status = serviceRequest.Status });
+
         }
 
-        [AcceptVerbs("GET", "POST")]        
+        [AcceptVerbs("GET", "POST")]
         public async Task<IActionResult> CheckDenialService(DateTime requestedDate)
         {
             var serviceRequests = await _serviceRequestOperations.GetServiceRequestsByRequestedDateAndStatus(
@@ -249,11 +260,9 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ServiceRequestMessages(string serviceRequestId)
-        {
-            return Json((await _serviceRequestMessageOperations.GetServiceRequestMessageAsync(serviceRequestId)).OrderByDescending(p => p.MessageDate));
-
-        }
+        public async Task<IActionResult> ServiceRequestMessages(string serviceRequestId) => Json((await _serviceRequestMessageOperations
+                                                                                                        .GetServiceRequestMessageAsync(serviceRequestId))
+                                                                                                        .OrderByDescending(p => p.MessageDate));
 
         [HttpPost]
         public async Task<IActionResult> CreateServiceRequestMessage(ServiceRequestMessage menssagem)
@@ -304,8 +313,6 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             return Json(true);
         }
 
-        /*
-
         [HttpGet]
         public async Task<IActionResult> MarkOfflineUser()
         {
@@ -353,7 +360,8 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             //       isCu = isCustomerOnline
             //   });
 
-            await _signalRConnectionManager.Clients.Users(users).SendAsync("online", new
+            //await _signalRConnectionManager.Clients.Users(users).SendAsync("online", new
+            await _signalRConnectionManager.Clients.All.SendAsync("online", new
             {
                 isAd = isAdminOnline,
                 isSe = isServiceEngineerOnline,
@@ -363,7 +371,6 @@ namespace ASC.Web.Areas.ServiceRequests.Controllers
             return Json(true);
         }
 
-        */
 
     }
 }

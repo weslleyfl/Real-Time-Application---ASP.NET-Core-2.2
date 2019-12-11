@@ -160,6 +160,9 @@ namespace ASC.Web
             //new ConfigureFromConfigurationOptions<ApplicationSettings>(Configuration.GetSection("AppSettings")).Configure(applicationSettings);
             //services.AddSingleton(applicationSettings);           
 
+            // Usar o HttpContext de componentes personalizados
+            services.AddHttpContextAccessor();
+
             // Add application services.            
             // Resolve HttpContextAccessor dependency
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

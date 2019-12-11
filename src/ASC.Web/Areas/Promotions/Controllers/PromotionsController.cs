@@ -11,9 +11,9 @@ using ASC.Models.Models;
 using System;
 using ASC.Models.BaseTypes;
 using ASC.Web.Areas.Promotions.Models;
-//using Microsoft.AspNetCore.SignalR.Infrastructure;
 using ASC.Web.ServiceHub;
 using ASC.Web.Data.Cache;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ASC.Web.Areas.Promotions.Controllers
 {
@@ -24,16 +24,18 @@ namespace ASC.Web.Areas.Promotions.Controllers
         private readonly IMapper _mapper;
         private readonly IMasterDataCacheOperations _masterData;
         //private readonly IConnectionManager _signalRConnectionManager;
-        public PromotionsController(IPromotionOperations promotionOperations, 
-            IMapper mapper, 
-            IMasterDataCacheOperations masterData
-            //IConnectionManager signalRConnectionManager
+        private readonly IHubContext<ServiceMessagesHub> _signalRConnectionManager;
+
+        public PromotionsController(IPromotionOperations promotionOperations,
+            IMapper mapper,
+            IMasterDataCacheOperations masterData,
+            IHubContext<ServiceMessagesHub> signalRConnectionManager
             )
         {
             _promotionOperations = promotionOperations;
             _mapper = mapper;
             _masterData = masterData;
-            //_signalRConnectionManager = signalRConnectionManager;
+            _signalRConnectionManager = signalRConnectionManager;
         }
 
         [HttpGet]
@@ -82,10 +84,7 @@ namespace ASC.Web.Areas.Promotions.Controllers
                 if (!promotion.IsDeleted)
                 {
                     // Broadcast the message to all clients asscoaited with new promotion
-                    //_signalRConnectionManager.GetHubContext<ServiceMessagesHub>()
-                    //    .Clients
-                    //    .All
-                    //    .publishPromotion(promotion);
+                    await _signalRConnectionManager.Clients.All.SendAsync("publishPromotion", promotion);
                 }
             }
 
@@ -98,7 +97,7 @@ namespace ASC.Web.Areas.Promotions.Controllers
             var promotions = await _promotionOperations.GetAllPromotionsAsync();
             var filteredPromotions = new List<Promotion>();
 
-            if(promotions != null)
+            if (promotions != null)
             {
                 filteredPromotions = promotions.Where(p => !p.IsDeleted).OrderByDescending(p => p.Timestamp).ToList();
             }

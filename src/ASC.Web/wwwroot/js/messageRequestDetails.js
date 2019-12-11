@@ -10,7 +10,6 @@
     //    return console.error(err.toString());
     //});
 
-
     //@* Need to pass Verification Token to get Request Validated for Forgery *@
     var token = $('input[type=hidden][name=__RequestVerificationToken]', document).val();
     $.ajaxSetup({
@@ -77,12 +76,6 @@
     // $.connection.serviceMessagesHub.client.online = updateUserStatus;
 
     connection.on("publishMessage", function (message) {
-        /*
-        var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        var div = document.createElement("div");
-        div.innerHTML = msg + "<hr/>";
-        document.getElementById("messages").appendChild(div);
-        */
 
         var menssagem = new Object();
 
@@ -101,10 +94,14 @@
         addMessage(menssagem);
     });
 
+    connection.on("online", function (data) {
+        updateUserStatus(data);
+    });
+
 
     //<!--error logging-->
     connection.start().catch(function (err) {
-        return console.error(err.toString());
+        return console.error(err.tostring());
     });
 
 
@@ -120,14 +117,13 @@
             '/images/green_dot.png' : '/images/red_dot.png');
     }
 
-    //@* Unload function to make sure the user is marked as offline. *@
-    /*
+    //@* Unload function to make sure the user is marked as offline. *@    
     $(window).unload(function () {
         $.get('/ServiceRequests/ServiceRequest/MarkOfflineUser',
             function (data, status) {
             });
     });
-    */
+
 
     //@* Function used to post message to server on keypress *@
     $('#txtMessage').keypress(function (e) {

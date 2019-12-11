@@ -11,7 +11,7 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/js/jqueryBundle.min.js",    
+    "outputFileName": "wwwroot/js/jqueryBundle.min.js",
     "inputFiles": [
       "wwwroot/lib/jquery/dist/jquery.js",
       "wwwroot/lib/jquery-validation/dist/jquery.validate.js",
@@ -37,6 +37,17 @@
     "outputFileName": "wwwroot/js/appBundle.min.js",
     "inputFiles": [
       "wwwroot/js/init.js"
+    ],
+    // Optionally specify minification options
+    "minify": {
+      "enabled": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/messageSignalRBundle.min.js",
+    "inputFiles": [
+      "wwwroot/js/messageSecureLayout.js",
+      "wwwroot/js/messageRequestDetails.js"
     ],
     // Optionally specify minification options
     "minify": {

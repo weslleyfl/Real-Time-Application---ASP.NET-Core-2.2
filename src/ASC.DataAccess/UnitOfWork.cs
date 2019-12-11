@@ -25,6 +25,7 @@ namespace ASC.DataAccess
         {
             complete = true;
         }
+
         private void RollbackTransaction()
         {
             while (RollbackActions.Count > 0)
@@ -33,6 +34,7 @@ namespace ASC.DataAccess
                 undoAction.Result();
             }
         }
+
         public IRepository<T> Repository<T>() where T : TableEntity
         {
             if (_repositories == null)
@@ -50,6 +52,7 @@ namespace ASC.DataAccess
 
             return (IRepository<T>)_repositories[type];
         }
+
         ~UnitOfWork()
         {
             Dispose(false);
@@ -69,6 +72,7 @@ namespace ASC.DataAccess
             }
             complete = false;
         }
+
         public void Dispose()
         {
             Dispose(true);
