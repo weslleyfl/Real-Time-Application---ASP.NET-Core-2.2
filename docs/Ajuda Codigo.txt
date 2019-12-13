@@ -18,4 +18,10 @@ Registration, Login, Logout, External Sources Login, Forgot Password, Reset
 Password, Two-Factor Authentication, and Send and Verify Codes.
 
 
+Para Ativar 
+Azure Table - Storage Emulator
+azure\storageEmulator\AzureStorageEmulator.exe start
+Redis cache
+Redis-server.exe
+PS C:\Users\weslleylopes> redis-server.exe
 ·
